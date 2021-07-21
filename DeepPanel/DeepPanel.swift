@@ -13,22 +13,25 @@ public class DeepPanel {
 
     static let modelInputImageSize = 224
     
-    private static var interpreter: Interpreter?
-    private static var nativeDeepPanel: DeepPaneliOSWrapper?
-    private static let classCount = 3
+    private var interpreter: Interpreter?
+    private var nativeDeepPanel: DeepPaneliOSWrapper?
+    private let classCount = 3
     
-    public static func initialize(useMetal: Bool = true) {
-        interpreter = initializeModel(useMetal: useMetal)
-        nativeDeepPanel = DeepPaneliOSWrapper()
+    public func initialize(useMetal: Bool = true) {
+        self.interpreter = initializeModel(useMetal: useMetal)
+        self.nativeDeepPanel = DeepPaneliOSWrapper()
     }
     
-    public init() {}
+    public init() {
+        self.initialize()
+    }
     
     public func extractPanelsInfo(from image: UIImage) -> PredictionResult {
-        guard let interpreter = DeepPanel.interpreter else {
+        
+        guard let interpreter = self.interpreter else {
             fatalError("DeepPanel interpreter hasn't been initialized")
         }
-        guard let nativeDeepPanel = DeepPanel.nativeDeepPanel else {
+        guard let nativeDeepPanel = self.nativeDeepPanel else {
             fatalError("NativeDeepPanel hasn't been initialized")
         }
         let imageRawData = scaleAndExtractImageRgbData(image)
@@ -43,10 +46,10 @@ public class DeepPanel {
     }
     
     public func extractDetailedPanelsInfo(from image: UIImage) -> DetailedPredictionResult {
-        guard let interpreter = DeepPanel.interpreter else {
+        guard let interpreter = self.interpreter else {
             fatalError("DeepPanel interpreter hasn't been initialized")
         }
-        guard let nativeDeepPanel = DeepPanel.nativeDeepPanel else {
+        guard let nativeDeepPanel = self.nativeDeepPanel else {
             fatalError("NativeDeepPanel hasn't been initialized")
         }
         let imageRawData = scaleAndExtractImageRgbData(image)
@@ -67,7 +70,7 @@ public class DeepPanel {
             predictionResult: predictionResult)
     }
 
-    private static func initializeModel(useMetal: Bool = true) -> Interpreter? {
+    private func initializeModel(useMetal: Bool = true) -> Interpreter? {
         guard let modelPath = Bundle.main.path(
           forResource: "model",
           ofType: "tflite"
@@ -85,8 +88,8 @@ public class DeepPanel {
               delegates = useMetal ? [MetalDelegate()] : nil
         #endif
         do {
-          let interpreter = try Interpreter(modelPath: modelPath, options: options, delegates: delegates)
-          try interpreter.allocateTensors()
+            let interpreter = try Interpreter(modelPath: modelPath, options: options, delegates: delegates)
+            try interpreter.allocateTensors()
           return interpreter
         } catch let error {
           fatalError("Failed to create the interpreter with error: \(error.localizedDescription)")
@@ -119,7 +122,7 @@ public class DeepPanel {
     }
     
     private func scaleAndExtractImageRgbData(_ image: UIImage) -> Data {
-        guard let interpreter = DeepPanel.interpreter else {
+        guard let interpreter = self.interpreter else {
             fatalError("DeepPanel hasn't been initialized")
         }
         do {
@@ -174,3 +177,4 @@ public class DeepPanel {
 
 
 }
+
